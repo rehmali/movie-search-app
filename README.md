@@ -42,3 +42,7 @@ Check out the live version here: [Movie Search App](https://rehmali.github.io/yo
 ![Movie Search App Screenshot](./screenshot.png)
 
 ---
+
+## 🌐 View Online
+
+[**Click here to view the live app**](https://movie-search-projec.netlify.app/)
