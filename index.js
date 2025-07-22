@@ -15,6 +15,9 @@ class Movies {
     this.searchInputEl = searchInputEl;
     this.formEl = formEl;
     this.movieContainerEL = movieContainerEL;
+
+    this.movieIDs = [];
+    this.sNo = 0;
   }
 
   // Showing Loading.. to use when API is fetching movie
@@ -32,6 +35,7 @@ class Movies {
       .map((g) => `<span class= "genre-item"> ${g}</span>`)
       .join("");
     let html = `
+    <button class="btn-close">❌</button>
   <img src=${movie.Poster} alt="${movie.Title} Poster" />
   <h3> ${movie.Title}</h3>
 
@@ -51,7 +55,13 @@ class Movies {
    <div> IMDB <span class="movie-detail"> ${movie.imdbRating} </span> </div>
    </div>
    <button class="save-movie">Save </button>
+   <div class="imdbID" style="display:none">${movie.imdbID}</div>
   `;
+
+    if (movie) {
+      this.movieIDs[this.sNo] = movie.imdbID;
+      this.sNo++;
+    }
 
     return html;
   }
@@ -59,6 +69,7 @@ class Movies {
   renderMovie(movie) {
     this.clearMovie();
 
+    this.currentMovie = movie;
     let newMovie = document.createElement("div");
     newMovie.classList.add("movie-card");
     newMovie.insertAdjacentHTML("afterbegin", this.renderMoviehtml(movie));
@@ -76,7 +87,7 @@ class Movies {
       const response = await fetch(
         `http://www.omdbapi.com/?t=${query}&apikey=8ca4d41f`
       );
-      console.log(response);
+      // console.log(response);
       if (!response.ok) throw new error("Movie Not found");
       const data = await response.json();
       if (data.Response === "False") {
@@ -84,6 +95,7 @@ class Movies {
         return;
       }
       this.renderMovie(data);
+      this.renderSavedMovies();
     } catch (err) {
       console.error(`Error Loading Movie ${err.message}`);
     }
@@ -95,12 +107,70 @@ class Movies {
     this.searchInputEl.value = "";
   }
 
+  renderSavedMovies() {
+    const savedAllMovies =
+      JSON.parse(localStorage.getItem("savedMovies")) || [];
+    savedAllMovies.forEach((f) => {
+      if (f) {
+        let newMovie = document.createElement("div");
+        newMovie.classList.add("movie-card");
+        newMovie.insertAdjacentHTML("afterbegin", this.renderMoviehtml(f));
+        this.movieContainerEL.appendChild(newMovie);
+      }
+    });
+  }
+
+  removeSavedMovie(movieCard) {
+    const imdbID = movieCard.querySelector(".imdbID")?.textContent;
+
+    let savedMovies = JSON.parse(localStorage.getItem("savedMovies")) || [];
+
+    savedMovies = savedMovies.filter((mov) => {
+      console.log(mov.imdbID, imdbID);
+      return mov?.imdbID !== imdbID;
+    });
+    localStorage.setItem("savedMovies", JSON.stringify(savedMovies));
+  }
+  saveMovie(movie) {
+    if (!movie || !movie.imdbID) {
+      return;
+    }
+    // 1. Get the saved movies from localStorage (or start with an empty array)
+    let savedMovies = JSON.parse(localStorage.getItem("savedMovies")) || [];
+
+    // 3. Add the new movie to the array
+    savedMovies.push(movie);
+
+    // 4. Save updated list back to localStorage
+    localStorage.setItem("savedMovies", JSON.stringify(savedMovies));
+
+    // 5. Optional: Give feedback
+    alert(`"${movie.Title}" has been saved!`);
+  }
+
   init() {
+    this.renderSavedMovies();
+
     this.formEl.addEventListener("submit", (e) => {
       e.preventDefault();
       const query = this.searchInputEl.value;
       this.fetchMovie(query);
       this.clearSearch();
+    });
+
+    this.movieContainerEL.addEventListener("click", (e) => {
+      if (e.target.classList.contains("save-movie")) {
+        if (this.currentMovie) {
+          this.saveMovie(this.currentMovie);
+        }
+      }
+      if (e.target.classList.contains("btn-close")) {
+        const movieCard = e.target.closest(".movie-card");
+        if (movieCard) {
+          this.removeSavedMovie(movieCard);
+          movieCard.remove();
+        }
+      }
     });
   }
 }
