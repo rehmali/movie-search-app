@@ -126,7 +126,6 @@ class Movies {
     let savedMovies = JSON.parse(localStorage.getItem("savedMovies")) || [];
 
     savedMovies = savedMovies.filter((mov) => {
-      console.log(mov.imdbID, imdbID);
       return mov?.imdbID !== imdbID;
     });
     localStorage.setItem("savedMovies", JSON.stringify(savedMovies));
