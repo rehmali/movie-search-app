@@ -85,7 +85,7 @@ class Movies {
       }
       this.showLoading();
       const response = await fetch(
-        `http://www.omdbapi.com/?t=${query}&apikey=8ca4d41f`
+        `https://www.omdbapi.com/?t=${query}&apikey=8ca4d41f`
       );
       // console.log(response);
       if (!response.ok) throw new error("Movie Not found");
@@ -143,7 +143,8 @@ class Movies {
     // 4. Save updated list back to localStorage
     localStorage.setItem("savedMovies", JSON.stringify(savedMovies));
 
-    // 5. Optional: Give feedback
+    // console.log(savedMovies);
+    // 5.Feedback
     alert(`"${movie.Title}" has been saved!`);
   }
 
@@ -176,7 +177,3 @@ class Movies {
 
 const theMovie = new Movies(userSearchedMovie, formSearch, movieContainer);
 theMovie.init();
-
-// Now add a Save Button
-// Save button will make stay movie in page , while user search for new movie
-// Write saveMovie() method in class
